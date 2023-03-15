@@ -1,15 +1,33 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useState } from 'react';
+
 
 
 const OneNewScreen = () => {
   const route = useRoute();
+  const [isFavorite, setIsFavorite] = useState(false);
   const { title, description, contenu, date, image_url } = route.params.item;
 
+  const saveToFavorites = async () => {
+
+    console.log(route.params.item)
+    setIsFavorite(true)
+    isFavorite===true?console.log('isFavorite'):console.log('it not Favorite')
+  
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <View style={styles.head}>
       <Text style={styles.title}>{title}</Text>
+      <TouchableOpacity onPress={saveToFavorites}>
+        <Icon name={isFavorite ? 'heart' : 'heart-outline'} size={30} color="red" />
+      </TouchableOpacity>
+      </View>
+     
       {image_url && <Image source={{ uri: image_url }} style={styles.image} />}
       <Text style={styles.publishedAt}>{date}</Text>
       <View style={styles.card}>
@@ -20,7 +38,7 @@ const OneNewScreen = () => {
           <Text style={styles.content}>{contenu}</Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -29,6 +47,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+
+  head: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+
   title: {
     fontSize: 24,
     fontWeight: 'bold',
