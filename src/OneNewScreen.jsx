@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useEffect, useState } from 'react';
 
 
 
@@ -11,11 +12,36 @@ const OneNewScreen = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const { title, description, contenu, date, image_url } = route.params.item;
 
+  useEffect(() => {
+    async function checkFavorite() {
+      const favoriesNews = await AsyncStorage.getItem('favorites');
+      if (favoriesNews !== null) {
+        const parsedFavoriesNews = JSON.parse(favoriesNews);
+        const foundFavorite = parsedFavoriesNews.find(favorite => favorite.title === title);
+        if (foundFavorite) {
+          setIsFavorite(true);
+        }
+      }
+    }
+    checkFavorite();
+  }, []);
+
+
   const saveToFavorites = async () => {
 
     console.log(route.params.item)
-    setIsFavorite(true)
-    isFavorite===true?console.log('isFavorite'):console.log('it not Favorite')
+    const favoriesNews = await AsyncStorage.getItem('favorites')
+    const news = favoriesNews ? JSON.parse(favoriesNews) :  [];
+    
+    const index = news.findIndex(article => article.title === item.title);
+    if (index !== -1) {
+     await news.splice(index, 1);
+      setIsFavorite(false);
+    } else {
+    await news.push(item);
+      setIsFavorite(true);
+    }
+    await AsyncStorage.setItem('favorites', JSON.stringify(news));
   
   };
 
