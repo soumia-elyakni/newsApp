@@ -1,23 +1,32 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useEffect, useState } from 'react';
-
-
+import {useEffect, useState} from 'react';
 
 const OneNewScreen = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const [isFavorite, setIsFavorite] = useState(false);
-  const { title, description, contenu, date, image_url } = route.params.item;
+  const {title, description, content, publishedAt, urlToImage} =
+    route.params.item;
 
   useEffect(() => {
     async function checkFavorite() {
       const favoriesNews = await AsyncStorage.getItem('favorites');
       if (favoriesNews !== null) {
         const parsedFavoriesNews = JSON.parse(favoriesNews);
-        const foundFavorite = parsedFavoriesNews.find(favorite => favorite.title === title);
+        const foundFavorite = parsedFavoriesNews.find(
+          favorite => favorite.title === title,
+        );
         if (foundFavorite) {
           setIsFavorite(true);
         }
@@ -26,42 +35,51 @@ const OneNewScreen = () => {
     checkFavorite();
   }, []);
 
-
   const saveToFavorites = async () => {
+    const item = route.params.item;
+    const favoriesNews = await AsyncStorage.getItem('favorites');
+    const news = favoriesNews ? JSON.parse(favoriesNews) : [];
 
-    console.log(route.params.item)
-    const favoriesNews = await AsyncStorage.getItem('favorites')
-    const news = favoriesNews ? JSON.parse(favoriesNews) :  [];
-    
     const index = news.findIndex(article => article.title === item.title);
+
     if (index !== -1) {
-     await news.splice(index, 1);
       setIsFavorite(false);
+      await news.splice(index, 1);
     } else {
-    await news.push(item);
       setIsFavorite(true);
+      await news.push(item);
     }
+
     await AsyncStorage.setItem('favorites', JSON.stringify(news));
-  
   };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.head}>
-      <Text style={styles.title}>{title}</Text>
-      <TouchableOpacity onPress={saveToFavorites}>
-        <Icon name={isFavorite ? 'heart' : 'heart-outline'} size={30} color="red" />
+      <TouchableOpacity
+        onPress={() => {
+          navigation.goBack();
+        }}>
+        <Icon name="arrow-back" size={30} />
       </TouchableOpacity>
-      </View>
-     
-      {image_url && <Image source={{ uri: image_url }} style={styles.image} />}
-      <Text style={styles.publishedAt}>{date}</Text>
+
+      <Text style={styles.title}>{title}</Text>
+
+      {urlToImage && <Image source={{uri: urlToImage}} style={styles.image} />}
+
+      <TouchableOpacity onPress={saveToFavorites}>
+        <Icon
+          name={isFavorite ? 'heart' : 'heart-outline'}
+          size={30}
+          color={isFavorite ? 'red' : 'black'}
+        />
+      </TouchableOpacity>
+
       <View style={styles.card}>
         <View style={styles.descriptionContainer}>
           <Text style={styles.description}>{description}</Text>
         </View>
         <View style={styles.contentContainer}>
-          <Text style={styles.content}>{contenu}</Text>
+          <Text style={styles.content}>{content}</Text>
         </View>
       </View>
     </ScrollView>
@@ -77,7 +95,7 @@ const styles = StyleSheet.create({
   head: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
 
   title: {
@@ -95,7 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'grey',
     marginBottom: 10,
-    textAlign : 'right',
+    textAlign: 'right',
   },
   card: {
     backgroundColor: '#f1f1f1',
