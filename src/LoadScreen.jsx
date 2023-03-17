@@ -12,9 +12,10 @@ const LoadScreen = () => {
     <View style={{flex:1, flexDirection:'column', justifyContent:'center', alignItems:'center', backgroundColor:'grey'}}>
     <StatusBar barStyle="light-content" hidden={false}  />
     <Image  source={Img} />
-    <TouchableOpacity onPress={()=>navigation.navigate("News")}>
+  <TouchableOpacity onPress={()=>navigation.navigate("News")}>
   <Text>See News</Text>
-</TouchableOpacity>
+  </TouchableOpacity>
+
 
     </View>
   )
